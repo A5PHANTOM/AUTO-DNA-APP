@@ -1,0 +1,140 @@
+AUTO DNA — PROJECT REPORT
+1. Introduction
+Auto DNA is a mobile-based vehicle information and reporting system developed as a college project. The
+application allows users to report vehicle incidents such as accidents and damage, which are then verified
+by an admin before being made publicly available. The system also includes a marketplace for buying and
+selling used vehicles.
+The primary goal of Auto DNA is to provide a simple and accessible platform to check the history of a
+vehicle using its number plate.
+
+2. Objectives
+• To develop a mobile application for vehicle incident reporting
+• To implement an admin-based approval system
+• To enable vehicle history search using number plate
+• To integrate AI-based damage estimation
+• To create a simple marketplace for used vehicles
+
+3. Scope of the Project
+This project is designed as a prototype system for academic purposes. It runs locally and focuses on
+demonstrating core functionalities rather than production-level deployment.
+
+4. System Overview
+The system consists of:
+• Flutter Mobile Application (Frontend)
+• FastAPI Backend (Server-side logic)
+• SQLite Database (Data storage)
+• Local file storage (Images)
+• Streamlit Admin Panel (Admin interface)
+
+1
+
+5. Features
+5.1 User Features
+• Login system
+• Submit vehicle incident reports
+• Upload images
+• Search vehicle history
+• View AI-based damage analysis
+• Access marketplace
+
+5.2 Admin Features
+• Login as admin
+• View all reports
+• Approve or reject reports
+• Simple admin dashboard using Streamlit
+• Login as admin
+• View all reports
+• Approve or reject reports
+
+5.3 AI Feature
+• Analyze vehicle damage based on description and images
+• Provide estimated damage percentage
+• Implemented using Gemini API for AI-based analysis
+
+6. System Architecture
+Flutter App → FastAPI Backend → SQLite Database ↓ Local Image Storage
+
+7. Module Description
+7.1 Authentication Module
+Handles user and admin login functionality.
+
+7.2 Report Module
+Allows users to submit vehicle reports with images and descriptions.
+
+2
+
+7.3 Admin Module
+Allows admin to approve or reject reports using a simple Streamlit dashboard.
+
+7.4 Search Module
+Searches vehicle data using number plate.
+
+7.5 AI Module
+Generates damage estimation using Gemini API based on image and description.
+
+7.6 Marketplace Module
+Allows users to post and view used vehicles.
+
+8. Database Design
+Users Table
+• id
+• username
+• password
+• role
+
+Reports Table
+• id
+• user_id
+• plate_number
+• description
+• image_path
+• status
+
+Vehicles Table
+• id
+• user_id
+• vehicle_name
+• plate_number
+• price
+• description
+• image_path
+• contact_info
+
+3
+
+9. Technologies Used
+• Flutter (Frontend)
+• FastAPI (Backend)
+• SQLite (Database)
+• Streamlit (Admin Panel)
+• Gemini API (AI Integration)
+• Python
+• Dart
+
+10. Advantages
+• Simple and easy to use
+• Mobile-based access
+• Demonstrates full-stack development
+• Includes AI-based feature
+
+11. Limitations
+• Runs only locally
+• Not optimized for production
+• Basic security implementation
+
+12. Future Enhancements
+• Cloud deployment
+• Advanced authentication (JWT)
+• Real AI model integration
+• Improved UI/UX
+
+13. Conclusion
+Auto DNA is a functional prototype that demonstrates the integration of frontend, backend, and database
+systems. It provides a practical solution for vehicle information tracking and showcases modern
+development technologies.
+
+End of Report
+
+4
+
+

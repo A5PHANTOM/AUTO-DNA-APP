@@ -1,0 +1,18 @@
+# Global gitignore
+**/.env
+**/venv/
+**/.venv/
+**/__pycache__/
+**/*.pyc
+**/*.sqlite3
+**/autodna.db
+**/uploads/
+.DS_Store
+
+# Flutter
+**/build/
+**/.dart_tool/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.packages
+**/Pods/

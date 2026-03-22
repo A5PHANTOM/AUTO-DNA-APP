@@ -1,0 +1,42 @@
+=========================================================
+      AUTO DNA - IMPORTANT PROJECT INSTRUCTIONS
+=========================================================
+
+1. CHANGING THE IP ADDRESS (NETWORK CHANGES)
+---------------------------------------------------------
+If your Mac connects to a different WiFi network, your local IP address will change. Because you are testing on a physical Android device, the Flutter app and Admin Panel need to know the new IP address of your Mac to talk to the backend.
+
+You must update the IP address in these TWO files:
+
+A) Frontend (Flutter App)
+File: frontend/lib/services/api_service.dart
+Look for Line 8: 
+  static const String baseUrl = 'http://192.168.1.4:8000/api';
+Change '192.168.1.4' to your Mac's new local IPv4 address.
+
+B) Admin Panel (Streamlit)
+File: admin/app.py
+Look for Line 5:
+  API_URL = "http://127.0.0.1:8000/api"
+(Note: Leave this as 127.0.0.1 if both the Backend and the Admin Panel stream from the same Mac. If you need to access the Admin Panel from a completely different device on the network, change 127.0.0.1 to your Mac's IP address).
+
+
+---------------------------------------------------------
+2. HOW TO RUN THE FULL AUTO DNA STACK
+---------------------------------------------------------
+You need to open three separate Terminal windows to run the whole platform.
+
+TERMINAL 1: Run the Backend Database & API
+  1. cd backend
+  2. source venv/bin/activate
+  3. uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+TERMINAL 2: Run the Admin Dashboard (Streamlit)
+  1. cd admin
+  2. source ../backend/venv/bin/activate
+  3. streamlit run app.py
+
+TERMINAL 3: Run the Flutter Mobile App
+  1. cd frontend
+  2. flutter run
+  (Make sure your Android phone is plugged in and authorized for debugging)

@@ -5,7 +5,7 @@ import os
 import google.generativeai as genai
 from PIL import Image
 import io
-
+import re
 from .. import schemas, models, database
 from ..auth import get_current_user
 
@@ -29,54 +29,111 @@ def analyze_report(
     db: Session = Depends(database.get_db)
 ):
     report = db.query(models.Report).filter(models.Report.id == report_id).first()
+    
     if not report:
         raise HTTPException(status_code=404, detail="Report not found")
-        
+
     api_key = os.getenv("GEMINI_API_KEY", "")
-    
-    # If there is no image, analyze the description instead
+
+    # Configure Gemini
+    if api_key:
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel('gemini-2.5-flash')
+
+    # 🔹 Helper to extract percentage
+    def extract_percentage(text):
+        match = re.search(r'(\d{1,3})\s*%', text)
+        if match:
+            return min(int(match.group(1)), 100)
+        return None
+
+    # =========================
+    # TEXT ANALYSIS (NO IMAGE)
+    # =========================
     if not report.image_path or not os.path.exists(report.image_path):
         try:
             if not api_key:
+                estimation_text = f"MOCKED: Based on '{report.description}', moderate damage detected."
+                report.ai_damage_estimation = estimation_text
+                db.commit()
                 return AIResponse(
-                    estimation=f"MOCKED AI RESPONSE: Based on the description '{report.description}', we estimate moderate damage.",
+                    estimation=estimation_text,
                     percentage=30
                 )
-            
-            genai.configure(api_key=api_key)
-            model = genai.GenerativeModel('gemini-flash-latest')
-            prompt = f"Analyze this incident report description. Estimate the damage severity as a percentage (0-100) based purely on the text. Description: '{report.description}'. Keep response professional and brief."
+
+            prompt = f"""
+            Analyze this incident report description and estimate damage severity.
+
+            Description: "{report.description}"
+
+            Return:
+            - Brief professional explanation
+            - Damage percentage (0-100%)
+
+            Format example:
+            Damage: XX%
+            Explanation: ...
+            """
+
             response = model.generate_content(prompt)
-            
+            text = response.text
+
+            percentage = extract_percentage(text) or 40
+
+            report.ai_damage_estimation = text
+            db.commit()
+
             return AIResponse(
-                estimation=response.text,
-                percentage=40
+                estimation=text,
+                percentage=percentage
             )
+
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"AI text analysis failed: {str(e)}")
-    
-    # Analyze with image
+
+    # =========================
+    # IMAGE ANALYSIS
+    # =========================
     try:
         pil_image = Image.open(report.image_path)
-        
+
         if not api_key:
+            estimation_text = "MOCKED: Moderate vehicle damage detected. Repair needed."
+            report.ai_damage_estimation = estimation_text
+            db.commit()
             return AIResponse(
-                estimation="MOCKED AI RESPONSE: The image reveals moderate structural damage. Required part replacement and painting estimated.",
+                estimation=estimation_text,
                 percentage=45
             )
 
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('gemini-flash-latest')
-        prompt = "Analyze this car image from an incident report. Describe the visual damage, what parts are affected, and estimate the damage severity as a percentage (0-100). Keep the description professional and brief."
+        prompt = """
+        Analyze this vehicle accident image.
+
+        Return:
+        - Visible damages
+        - Affected parts
+        - Estimated severity percentage (0-100%)
+
+        Format:
+        Damage: XX%
+        Explanation: ...
+        """
+
         response = model.generate_content([prompt, pil_image])
-        
+        text = response.text
+
+        percentage = extract_percentage(text) or 50
+
+        report.ai_damage_estimation = text
+        db.commit()
+
         return AIResponse(
-            estimation=response.text,
-            percentage=50
+            estimation=text,
+            percentage=percentage
         )
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"AI analysis failed: {str(e)}")
-
 @router.post("/estimate-damage", response_model=AIResponse)
 async def estimate_damage(
     image: UploadFile = File(...),
@@ -93,7 +150,7 @@ async def estimate_damage(
                 percentage=45
             )
 
-        model = genai.GenerativeModel('gemini-flash-latest')
+        model = genai.GenerativeModel('gemini-2.5-flash')
         prompt = "Analyze this car image. Describe the visual damage and estimate the damage severity as a percentage (0-100). Keep the description brief."
         response = model.generate_content([prompt, pil_image])
         

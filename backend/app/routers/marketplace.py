@@ -13,6 +13,23 @@ router = APIRouter(
     tags=["Marketplace"]
 )
 
+
+def _should_backfill_ai(report: models.Report) -> bool:
+    text = (report.ai_damage_estimation or "").strip().lower()
+    return (not text) or text.startswith("failed") or text.startswith("error")
+
+
+def _backfill_report_ai(reports: List[models.Report], db: Session) -> None:
+    from .ai import analyze_report
+
+    for report in reports:
+        if _should_backfill_ai(report):
+            try:
+                analyze_report(report.id, db)
+                db.refresh(report)
+            except Exception:
+                continue
+
 @router.post("/", response_model=schemas.VehicleResponse)
 async def post_vehicle(
     vehicle_name: str = Form(...),
@@ -60,6 +77,7 @@ def get_all_vehicles(db: Session = Depends(database.get_db)):
     # Process each vehicle to fetch the accident summary
     for v in vehicles:
         reports = db.query(models.Report).filter(models.Report.plate_number == v.plate_number).all()
+        _backfill_report_ai(reports, db)
         v.accident_reports = reports
             
     return vehicles
@@ -72,6 +90,7 @@ def get_my_listings(
     vehicles = db.query(models.Vehicle).filter(models.Vehicle.user_id == current_user.id).all()
     for v in vehicles:
         reports = db.query(models.Report).filter(models.Report.plate_number == v.plate_number).all()
+        _backfill_report_ai(reports, db)
         v.accident_reports = reports
     return vehicles
 

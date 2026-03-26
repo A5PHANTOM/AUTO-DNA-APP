@@ -78,7 +78,12 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                           Text(r['description'] ?? '', style: const TextStyle(color: Colors.white70)),
                           const Divider(height: 24, color: Colors.white24),
                           const Text('AI Damage Estimation', style: TextStyle(color: Color(0xFF10B981), fontWeight: FontWeight.bold)),
-                          Text(r['ai_damage_estimation'] ?? 'No AI data', style: const TextStyle(color: Colors.white70)),
+                          Text(
+                            (r['ai_damage_estimation'] ?? r['ai_estimation'] ?? '').toString().trim().isNotEmpty
+                                ? (r['ai_damage_estimation'] ?? r['ai_estimation']).toString().trim()
+                                : 'No AI data',
+                            style: const TextStyle(color: Colors.white70),
+                          ),
                         ],
                       ),
                     ),

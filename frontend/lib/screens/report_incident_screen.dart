@@ -19,6 +19,13 @@ class _ReportIncidentScreenState extends State<ReportIncidentScreen> {
 
   final ImagePicker _picker = ImagePicker();
 
+  bool _hasValidAiEstimation() {
+    final text = _aiEstimation?.trim() ?? '';
+    if (text.isEmpty) return false;
+    final lower = text.toLowerCase();
+    return !lower.startsWith('failed') && !lower.startsWith('error');
+  }
+
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
@@ -66,6 +73,10 @@ class _ReportIncidentScreenState extends State<ReportIncidentScreen> {
       return;
     }
 
+    if (_image != null && !_hasValidAiEstimation()) {
+      await _getAiEstimation();
+    }
+
     setState(() => _isLoading = true);
 
     final token = await ApiService.getToken();
@@ -76,6 +87,9 @@ class _ReportIncidentScreenState extends State<ReportIncidentScreen> {
 
     request.fields['plate_number'] = _plateController.text.toUpperCase();
     request.fields['description'] = _descController.text;
+    if (_hasValidAiEstimation()) {
+      request.fields['ai_damage_estimation'] = _aiEstimation!.trim();
+    }
     
     if (_image != null) {
       request.files.add(await http.MultipartFile.fromPath('image', _image!.path));

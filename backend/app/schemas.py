@@ -16,6 +16,7 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str
+    role: Optional[str] = "user"
 
 class UserResponse(UserBase):
     id: int
@@ -60,6 +61,68 @@ class VehicleResponse(VehicleBase):
     user_id: int
     image_path: Optional[str] = None
     accident_reports: List[ReportResponse] = []
+
+    class Config:
+        from_attributes = True
+
+# Spare Part Schemas
+class SparePartOfferBase(BaseModel):
+    price: float
+    notes: Optional[str] = None
+
+class SparePartOfferCreate(SparePartOfferBase):
+    pass
+
+class SparePartOfferResponse(SparePartOfferBase):
+    id: int
+    request_id: int
+    workshop_id: int
+
+    class Config:
+        from_attributes = True
+
+class SparePartRequestBase(BaseModel):
+    part_name: str
+    car_model: str
+    description: str
+
+class SparePartRequestCreate(SparePartRequestBase):
+    pass
+
+class SparePartRequestResponse(SparePartRequestBase):
+    id: int
+    user_id: int
+    offers: List[SparePartOfferResponse] = []
+
+    class Config:
+        from_attributes = True
+
+from datetime import datetime
+
+class MessageBase(BaseModel):
+    text: str
+
+class MessageCreate(MessageBase):
+    pass
+
+class MessageResponse(MessageBase):
+    id: int
+    thread_id: int
+    sender_id: int
+    timestamp: datetime
+
+    class Config:
+        from_attributes = True
+
+class ChatThreadCreate(BaseModel):
+    offer_id: int
+
+class ChatThreadResponse(BaseModel):
+    id: int
+    offer_id: int
+    user_id: int
+    workshop_id: int
+    created_at: datetime
 
     class Config:
         from_attributes = True

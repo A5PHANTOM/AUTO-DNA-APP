@@ -17,14 +17,27 @@ class ApiService {
     return prefs.getString('token');
   }
 
-  static Future<void> setToken(String token) async {
+  static Future<void> setToken(String token, {String role = 'user', int userId = 0}) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('token', token);
+    await prefs.setString('role', role);
+    await prefs.setInt('user_id', userId);
+  }
+
+  static Future<int?> getUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt('user_id');
+  }
+
+  static Future<String?> getRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('role');
   }
 
   static Future<void> removeToken() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('token');
+    await prefs.remove('role');
   }
 
   static Future<Map<String, dynamic>> login(String username, String password) async {
@@ -40,7 +53,7 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        await setToken(data['access_token']);
+        await setToken(data['access_token'], role: data['role'] ?? 'user', userId: data['user_id'] ?? 0);
         return {'success': true, 'data': data};
       }
       return {'success': false, 'message': 'Invalid credentials (${response.statusCode})'};
@@ -49,7 +62,7 @@ class ApiService {
     }
   }
 
-  static Future<Map<String, dynamic>> register(String username, String password) async {
+  static Future<Map<String, dynamic>> register(String username, String password, String role) async {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/auth/register'),
@@ -57,7 +70,7 @@ class ApiService {
           ..._tunnelHeaders,
           'Content-Type': 'application/json',
         },
-        body: json.encode({'username': username, 'password': password}),
+        body: json.encode({'username': username, 'password': password, 'role': role}),
       ).timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {

@@ -6,7 +6,7 @@ import os
 
 load_dotenv()
 
-from .routers import auth, reports, search, marketplace, ai, admin
+from .routers import auth, reports, search, marketplace, ai, admin, spare_parts, chat
 import os
 
 from .database import engine, Base
@@ -32,6 +32,8 @@ app.include_router(search.router)
 app.include_router(marketplace.router)
 app.include_router(ai.router)
 app.include_router(admin.router)
+app.include_router(spare_parts.router)
+app.include_router(chat.router)
 
 # Create static directory for uploaded images if it doesn't exist
 os.makedirs("uploads", exist_ok=True)

@@ -163,13 +163,29 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
                             Stack(
                               children: [
                                 if (imagePath != null)
-                                  Image.network(
-                                    imageUrl,
-                                    height: 200, width: double.infinity,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) => Container(
-                                      height: 200, color: const Color(0xFF334155),
-                                      child: const Center(child: Icon(Icons.broken_image, color: Colors.white54, size: 48)),
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(context, MaterialPageRoute(builder: (_) => Scaffold(
+                                        backgroundColor: Colors.black,
+                                        appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0, iconTheme: const IconThemeData(color: Colors.white)),
+                                        body: Center(
+                                          child: InteractiveViewer(
+                                            panEnabled: true,
+                                            minScale: 1,
+                                            maxScale: 4,
+                                            child: Image.network(imageUrl),
+                                          )
+                                        )
+                                      )));
+                                    },
+                                    child: Image.network(
+                                      imageUrl,
+                                      height: 200, width: double.infinity,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) => Container(
+                                        height: 200, color: const Color(0xFF334155),
+                                        child: const Center(child: Icon(Icons.broken_image, color: Colors.white54, size: 48)),
+                                      ),
                                     ),
                                   ),
                                 Positioned(
@@ -196,7 +212,7 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
                                           style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
                                         ),
                                       ),
-                                      Text('\$${vehicle['price']}', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF10B981))),
+                                      Text('₹${vehicle['price']}', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF10B981))),
                                     ],
                                   ),
                                   const SizedBox(height: 8),

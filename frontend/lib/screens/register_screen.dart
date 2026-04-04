@@ -9,13 +9,15 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
+  String _selectedRole = 'user';
   bool _isLoading = false;
 
   Future<void> _register() async {
     setState(() => _isLoading = true);
     final response = await ApiService.register(
-      _usernameController.text,
+      _usernameController.text.trim(),
       _passwordController.text,
+      _selectedRole,
     );
     setState(() => _isLoading = false);
 
@@ -81,6 +83,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         labelText: 'Password',
                         prefixIcon: Icon(Icons.lock_outline, color: Colors.white70),
                       ),
+                    ),
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<String>(
+                      value: _selectedRole,
+                      dropdownColor: const Color(0xFF1E293B),
+                      decoration: const InputDecoration(
+                        labelText: 'Account Type',
+                        prefixIcon: Icon(Icons.badge_outlined, color: Colors.white70),
+                      ),
+                      style: const TextStyle(color: Colors.white),
+                      items: const [
+                        DropdownMenuItem(value: 'user', child: Text('Car Owner')),
+                        DropdownMenuItem(value: 'workshop', child: Text('Workshop Owner')),
+                      ],
+                      onChanged: (val) {
+                        if (val != null) setState(() => _selectedRole = val);
+                      },
                     ),
                     const SizedBox(height: 32),
                     _isLoading

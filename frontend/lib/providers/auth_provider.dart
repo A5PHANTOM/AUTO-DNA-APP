@@ -14,6 +14,7 @@ class AuthProvider with ChangeNotifier {
     final token = await ApiService.getToken();
     if (token != null) {
       _isAuthenticated = true;
+      _role = await ApiService.getRole() ?? 'user';
       // Ideally we would decode JWT or fetch user profile here
       // For now, assume simple auth
     } else {
@@ -43,8 +44,8 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<bool> register(String username, String password) async {
-    final result = await ApiService.register(username, password);
+  Future<bool> register(String username, String password, {String role = 'user'}) async {
+    final result = await ApiService.register(username, password, role);
     return result['success'];
   }
 

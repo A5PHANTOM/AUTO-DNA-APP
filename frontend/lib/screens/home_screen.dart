@@ -7,6 +7,8 @@ import 'report_incident_screen.dart';
 import 'search_screen.dart';
 import 'marketplace_screen.dart';
 import 'my_listings_screen.dart';
+import 'spare_parts_screen.dart';
+import 'chat_list_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -16,16 +18,52 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
 
-  final List<Widget> _pages = [
-    DashboardScreen(),
-    ReportIncidentScreen(),
-    SearchScreen(),
-    MarketplaceScreen(),
-    MyListingsScreen(),
-  ];
+  List<Widget> _getPages(String role) {
+    if (role == 'workshop') {
+      return [
+        DashboardScreen(),
+        SparePartsScreen(),
+        ChatListScreen(),
+      ];
+    }
+    return [
+      DashboardScreen(),
+      ReportIncidentScreen(),
+      SearchScreen(),
+      MarketplaceScreen(),
+      MyListingsScreen(),
+      SparePartsScreen(),
+      ChatListScreen(),
+    ];
+  }
+
+  List<BottomNavigationBarItem> _getNavItems(String role) {
+    if (role == 'workshop') {
+      return const [
+        BottomNavigationBarItem(icon: Icon(Icons.dashboard_rounded), label: 'Dashboard'),
+        BottomNavigationBarItem(icon: Icon(Icons.build_circle), label: 'Parts'),
+        BottomNavigationBarItem(icon: Icon(Icons.message_rounded), label: 'Messages'),
+      ];
+    }
+    return const [
+      BottomNavigationBarItem(icon: Icon(Icons.dashboard_rounded), label: 'Dashboard'),
+      BottomNavigationBarItem(icon: Icon(Icons.add_circle_outline), label: 'Report'),
+      BottomNavigationBarItem(icon: Icon(Icons.search_rounded), label: 'Search'),
+      BottomNavigationBarItem(icon: Icon(Icons.storefront_rounded), label: 'Market'),
+      BottomNavigationBarItem(icon: Icon(Icons.list_alt), label: 'Listings'),
+      BottomNavigationBarItem(icon: Icon(Icons.build_circle), label: 'Parts'),
+      BottomNavigationBarItem(icon: Icon(Icons.message_rounded), label: 'Messages'),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
+    final role = Provider.of<AuthProvider>(context).role;
+    final pages = _getPages(role);
+    final navItems = _getNavItems(role);
+
+    if (_currentIndex >= pages.length) _currentIndex = 0;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('AUTO DNA', style: TextStyle(letterSpacing: 2, fontWeight: FontWeight.bold)),
@@ -47,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
             colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
           ),
         ),
-        child: _pages[_currentIndex],
+        child: pages[_currentIndex],
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
@@ -67,13 +105,7 @@ class _HomeScreenState extends State<HomeScreen> {
           onTap: (index) => setState(() => _currentIndex = index),
           type: BottomNavigationBarType.fixed,
           elevation: 0,
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.dashboard_rounded), label: 'Dashboard'),
-            BottomNavigationBarItem(icon: Icon(Icons.add_circle_outline), label: 'Report'),
-            BottomNavigationBarItem(icon: Icon(Icons.search_rounded), label: 'Search'),
-            BottomNavigationBarItem(icon: Icon(Icons.storefront_rounded), label: 'Market'),
-            BottomNavigationBarItem(icon: Icon(Icons.list_alt), label: 'My Listings'),
-          ],
+          items: navItems,
         ),
       ),
     );

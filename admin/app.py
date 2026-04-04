@@ -4,7 +4,7 @@ import pandas as pd
 from collections import defaultdict
 import os
 
-API_URL = "http://127.0.0.1:8000/api"
+API_URL = "http://192.168.1.4:8000/api"
 REQUEST_TIMEOUT_SECONDS = 12
 DEFAULT_PUBLIC_BASE_URL = os.getenv("BACKEND_PUBLIC_BASE_URL", API_URL.replace("/api", ""))
 
@@ -226,7 +226,7 @@ def render_dashboard():
     st.session_state["public_base_url"] = st.sidebar.text_input(
         "Backend public URL",
         value=st.session_state["public_base_url"],
-        help="Used to render uploaded images. Example: http://127.0.0.1:8000",
+        help="Used to render uploaded images. Example: http://192.168.1.4:8000",
     ).strip() or DEFAULT_PUBLIC_BASE_URL
 
     reports = fetch_reports(st.session_state["token"])

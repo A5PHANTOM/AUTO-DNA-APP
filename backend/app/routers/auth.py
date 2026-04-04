@@ -20,7 +20,10 @@ def register(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
     hashed_password = get_password_hash(user.password)
     # Check if first user, make them admin (optional utility)
     user_count = db.query(models.User).count()
-    role = "admin" if user_count == 0 else "user"
+    if user_count == 0:
+        role = "admin"
+    else:
+        role = user.role if user.role in ["user", "workshop"] else "user"
 
     new_user = models.User(username=user.username, password=hashed_password, role=role)
     db.add(new_user)
@@ -44,4 +47,4 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db:
     access_token = create_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires
     )
-    return {"access_token": access_token, "token_type": "bearer", "role": user.role}
+    return {"access_token": access_token, "token_type": "bearer", "role": user.role, "user_id": user.id}

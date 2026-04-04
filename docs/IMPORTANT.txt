@@ -11,14 +11,16 @@ You must update the IP address in these TWO files:
 A) Frontend (Flutter App)
 File: frontend/lib/services/api_service.dart
 Look for Line 8: 
-  static const String baseUrl = 'http://192.168.1.4:8000/api';
-Change '192.168.1.4' to your Mac's new local IPv4 address.
+  static const String baseUrl = 'http://192.168.1.4:8000
+/api';
+Change this IP whenever your Mac gets a new local IPv4 address.
 
 B) Admin Panel (Streamlit)
 File: admin/app.py
 Look for Line 5:
-  API_URL = "http://127.0.0.1:8000/api"
-(Note: Leave this as 127.0.0.1 if both the Backend and the Admin Panel stream from the same Mac. If you need to access the Admin Panel from a completely different device on the network, change 127.0.0.1 to your Mac's IP address).
+  API_URL = "http://192.168.1.4:8000
+/api"
+(Use your Mac's current local IPv4 address when the Admin Panel or app is accessed over the local network.)
 
 
 ---------------------------------------------------------

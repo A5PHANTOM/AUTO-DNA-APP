@@ -147,14 +147,30 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             if (imagePath != null)
-                              Image.network(
-                                imageUrl,
-                                height: 200,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) => Container(
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.push(context, MaterialPageRoute(builder: (_) => Scaffold(
+                                    backgroundColor: Colors.black,
+                                    appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0, iconTheme: const IconThemeData(color: Colors.white)),
+                                    body: Center(
+                                      child: InteractiveViewer(
+                                        panEnabled: true,
+                                        minScale: 1,
+                                        maxScale: 4,
+                                        child: Image.network(imageUrl),
+                                      )
+                                    )
+                                  )));
+                                },
+                                child: Image.network(
+                                  imageUrl,
                                   height: 200,
-                                  color: const Color(0xFF334155),
-                                  child: const Center(child: Icon(Icons.broken_image, color: Colors.white54, size: 48)),
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) => Container(
+                                    height: 200,
+                                    color: const Color(0xFF334155),
+                                    child: const Center(child: Icon(Icons.broken_image, color: Colors.white54, size: 48)),
+                                  ),
                                 ),
                               ),
                             Padding(
@@ -173,7 +189,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                                         ),
                                       ),
                                       Text(
-                                        '\$${vehicle['price']}',
+                                        '₹${vehicle['price']}',
                                         style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF10B981)),
                                       ),
                                     ],
@@ -359,7 +375,7 @@ class _AddVehicleFormState extends State<AddVehicleForm> {
                     children: [
                       Expanded(child: TextField(controller: _plateController, textCapitalization: TextCapitalization.characters, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Plate Number'))),
                       const SizedBox(width: 12),
-                      Expanded(child: TextField(controller: _priceController, keyboardType: TextInputType.number, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Asking Price (\$)'))),
+                      Expanded(child: TextField(controller: _priceController, keyboardType: TextInputType.number, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Asking Price (₹)'))),
                     ],
                   ),
                   const SizedBox(height: 12),

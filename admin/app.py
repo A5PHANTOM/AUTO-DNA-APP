@@ -178,23 +178,11 @@ def render_metrics(reports):
     pending = sum(1 for r in reports if (r.get("status") or "pending").lower() == "pending")
 
     col1, col2, col3, col4 = st.columns(4)
-    for col, label, value in [
-        (col1, "Total Reports", total),
-        (col2, "Pending", pending),
-        (col3, "Approved", approved),
-        (col4, "Rejected", rejected),
-    ]:
-        with col:
-            st.markdown(
-                f"""
-                <div class='metric-card'>
-                    <div class='subtle-label'>{label}</div>
-                    <div class='metric-value'>{value}</div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-
+    col1.metric("Total Reports", total)
+    col2.metric("Pending", pending)
+    col3.metric("Approved", approved)
+    col4.metric("Rejected", rejected)
+    st.markdown("<br>", unsafe_allow_html=True)
 
 def render_login():
     st.markdown(
@@ -213,6 +201,40 @@ def render_login():
         if st.button("Sign in", use_container_width=True):
             login(username.strip(), password)
 
+
+def render_report_card(report, tab_name):
+    report_id = report.get("id")
+    report_status = (report.get("status") or "pending").lower()
+    ai_text = str(report.get("ai_damage_estimation") or "").strip()
+    if not ai_text or ai_text.lower().startswith("failed") or ai_text.lower().startswith("error"):
+        ai_text = "No AI data available yet."
+
+    with st.expander(f"Report #{report_id} - {report.get('vehicle_details', 'Vehicle Details')}", expanded=True):
+        st.markdown(f"<span class='status-pill {status_class(report_status)}'>{report_status.upper()}</span>", unsafe_allow_html=True)
+        st.write("")
+        
+        col1, col2 = st.columns([1, 2])
+        with col1:
+            image_url = build_image_url(report.get("image_path"), st.session_state["public_base_url"])
+            if image_url:
+                st.image(image_url, use_container_width=True, caption=f"Report #{report_id}")
+            else:
+                st.info("No image attached.")
+                
+        with col2:
+            st.markdown("**Description**")
+            st.caption(str(report.get("description") or "No description provided."))
+            st.markdown("**AI Damage Estimation**")
+            st.caption(ai_text)
+            
+            st.write("")
+            action_col1, action_col2 = st.columns(2)
+            with action_col1:
+                if st.button("Approve", key=f"approve_{report_id}_{tab_name}", disabled=report_status == "approved", use_container_width=True):
+                    update_report_status(st.session_state["token"], report_id, "approved")
+            with action_col2:
+                if st.button("Reject", key=f"reject_{report_id}_{tab_name}", disabled=report_status == "rejected", use_container_width=True):
+                    update_report_status(st.session_state["token"], report_id, "rejected")
 
 def render_dashboard():
     st.sidebar.title("Admin")
@@ -247,98 +269,38 @@ def render_dashboard():
         return
 
     render_metrics(reports)
-    st.markdown("### Filters")
+    
+    search_plate = st.sidebar.text_input("Search by plate", placeholder="Type plate number...").strip().upper()
 
-    filter_col1, filter_col2 = st.columns([2, 1])
-    with filter_col1:
-        search_plate = st.text_input("Search by plate", placeholder="Type plate number...").strip().upper()
-    with filter_col2:
-        status_filter = st.selectbox("Status", ["all", "pending", "approved", "rejected"], index=0)
+    tabs = st.tabs(["Pending", "Approved", "Rejected", "All"])
+    
+    def display_reports(status_filter):
+        filtered = reports
+        if search_plate:
+            filtered = [r for r in filtered if search_plate in str(r.get("plate_number", "")).upper()]
+        
+        if status_filter != "all":
+            filtered = [r for r in filtered if (r.get("status") or "pending").lower() == status_filter]
+            
+        if not filtered:
+            st.warning("No reports match the current filters.")
+            return
 
-    filtered = reports
-    if search_plate:
-        filtered = [r for r in filtered if search_plate in str(r.get("plate_number", "")).upper()]
-    if status_filter != "all":
-        filtered = [r for r in filtered if (r.get("status") or "pending").lower() == status_filter]
+        grouped_reports = grouped_by_plate(filtered)
+        
+        for plate, plate_reports in grouped_reports.items():
+            st.markdown(f"<div class='plate-header'><strong>Plate:</strong> {plate} &nbsp;&nbsp; <span style='color:#94a3b8;'>Reports: {len(plate_reports)}</span></div>", unsafe_allow_html=True)
+            for report in plate_reports:
+                render_report_card(report, status_filter)
 
-    if not filtered:
-        st.warning("No reports match the current filters.")
-        return
-
-    grouped_reports = grouped_by_plate(filtered)
-    st.markdown("### Plate-wise Report Queue")
-
-    for plate, plate_reports in grouped_reports.items():
-        st.markdown(
-            f"""
-            <div class='plate-header'>
-                <strong>Plate:</strong> {plate} &nbsp;&nbsp; <span style='color:#94a3b8;'>Reports: {len(plate_reports)}</span>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-        df = pd.DataFrame(plate_reports)
-        for required in ["id", "description", "status", "ai_damage_estimation"]:
-            if required not in df.columns:
-                df[required] = ""
-        st.dataframe(df[["id", "description", "status", "ai_damage_estimation"]], use_container_width=True)
-
-        image_items = []
-        for report in plate_reports:
-            image_url = build_image_url(report.get("image_path"), st.session_state["public_base_url"])
-            if image_url:
-                image_items.append((report.get("id"), image_url))
-
-        if image_items:
-            st.markdown("**Uploaded Images**")
-            cols = st.columns(min(3, len(image_items)))
-            for idx, (report_id, image_url) in enumerate(image_items):
-                with cols[idx % len(cols)]:
-                    st.image(image_url, caption=f"Report #{report_id}", use_column_width=True)
-
-        for report in plate_reports:
-            report_id = report.get("id")
-            report_status = (report.get("status") or "pending").lower()
-            ai_text = str(report.get("ai_damage_estimation") or "").strip()
-            if not ai_text or ai_text.lower().startswith("failed") or ai_text.lower().startswith("error"):
-                ai_text = "No AI data available yet."
-
-            with st.expander(f"Report #{report_id}"):
-                st.markdown(
-                    f"""
-                    <span class='status-pill {status_class(report_status)}'>{report_status.upper()}</span>
-                    """,
-                    unsafe_allow_html=True,
-                )
-                st.write("Description")
-                st.caption(str(report.get("description") or "No description provided."))
-                st.write("AI Damage Estimation")
-                st.caption(str(ai_text))
-                if report.get("image_path"):
-                    st.caption(f"Image path: {report['image_path']}")
-                    image_url = build_image_url(report.get("image_path"), st.session_state["public_base_url"])
-                    if image_url:
-                        st.image(image_url, caption="Uploaded vehicle image", use_column_width=True)
-
-                action_col1, action_col2 = st.columns(2)
-                with action_col1:
-                    if st.button(
-                        "Approve",
-                        key=f"approve_{report_id}",
-                        disabled=report_status == "approved",
-                        use_container_width=True,
-                    ):
-                        update_report_status(st.session_state["token"], report_id, "approved")
-                with action_col2:
-                    if st.button(
-                        "Reject",
-                        key=f"reject_{report_id}",
-                        disabled=report_status == "rejected",
-                        use_container_width=True,
-                    ):
-                        update_report_status(st.session_state["token"], report_id, "rejected")
-
+    with tabs[0]:
+        display_reports("pending")
+    with tabs[1]:
+        display_reports("approved")
+    with tabs[2]:
+        display_reports("rejected")
+    with tabs[3]:
+        display_reports("all")
 
 inject_styles()
 

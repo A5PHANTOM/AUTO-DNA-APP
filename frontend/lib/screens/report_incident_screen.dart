@@ -6,6 +6,8 @@ import 'package:http/http.dart' as http;
 import '../services/api_service.dart';
 
 class ReportIncidentScreen extends StatefulWidget {
+  const ReportIncidentScreen({super.key});
+
   @override
   _ReportIncidentScreenState createState() => _ReportIncidentScreenState();
 }
@@ -96,6 +98,8 @@ class _ReportIncidentScreenState extends State<ReportIncidentScreen> {
     }
 
     final response = await request.send();
+    if (!mounted) return;
+
     if (response.statusCode == 200) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Report submitted successfully!'), backgroundColor: Color(0xFF10B981)));
       _plateController.clear();
@@ -143,7 +147,7 @@ class _ReportIncidentScreenState extends State<ReportIncidentScreen> {
               decoration: BoxDecoration(
                 color: const Color(0xFF1E293B),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFF3B82F6).withOpacity(0.5), width: 2, style: BorderStyle.solid),
+                border: Border.all(color: const Color(0xFF3B82F6).withValues(alpha: 0.5), width: 2, style: BorderStyle.solid),
               ),
               child: _image == null
                   ? Column(

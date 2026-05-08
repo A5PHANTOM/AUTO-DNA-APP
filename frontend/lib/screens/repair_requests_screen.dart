@@ -8,14 +8,12 @@ import '../services/api_service.dart';
 import '../providers/auth_provider.dart';
 import 'chat_screen.dart';
 
-class SparePartsScreen extends StatefulWidget {
-  const SparePartsScreen({super.key});
-
+class RepairRequestsScreen extends StatefulWidget {
   @override
-  _SparePartsScreenState createState() => _SparePartsScreenState();
+  _RepairRequestsScreenState createState() => _RepairRequestsScreenState();
 }
 
-class _SparePartsScreenState extends State<SparePartsScreen> {
+class _RepairRequestsScreenState extends State<RepairRequestsScreen> {
   List<dynamic> _requests = [];
   bool _isLoading = true;
 
@@ -28,7 +26,7 @@ class _SparePartsScreenState extends State<SparePartsScreen> {
   Future<void> _fetchRequests() async {
     final token = await ApiService.getToken();
     final response = await http.get(
-      Uri.parse('${ApiService.baseUrl}/spare-parts/'),
+      Uri.parse('${ApiService.baseUrl}/repairs/'),
       headers: {'Authorization': 'Bearer $token'},
     );
 
@@ -46,14 +44,14 @@ class _SparePartsScreenState extends State<SparePartsScreen> {
     }
   }
 
-  Future<void> _startChat(int offerId, String partnerName, String partName) async {
+  Future<void> _startChat(int bidId, String partnerName, String partName) async {
     showDialog(context: context, barrierDismissible: false, builder: (_) => const Center(child: CircularProgressIndicator()));
     
     final token = await ApiService.getToken();
     final res = await http.post(
       Uri.parse('${ApiService.baseUrl}/chat/threads'),
       headers: {'Authorization': 'Bearer $token', 'Content-Type': 'application/json'},
-      body: json.encode({'offer_id': offerId}),
+      body: json.encode({'bid_id': bidId}),
     );
     
     if (mounted) Navigator.pop(context); // close dialog
@@ -87,7 +85,7 @@ class _SparePartsScreenState extends State<SparePartsScreen> {
 
     final token = await ApiService.getToken();
     final res = await http.delete(
-      Uri.parse('${ApiService.baseUrl}/spare-parts/$requestId'),
+      Uri.parse('${ApiService.baseUrl}/repairs/$requestId'),
       headers: {'Authorization': 'Bearer $token'},
     );
 
@@ -122,9 +120,9 @@ class _SparePartsScreenState extends State<SparePartsScreen> {
               children: [
                 const Text('Request Spare Part', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 16),
-                TextField(controller: partNameController, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Part Name')),
+                TextField(controller: partNameController, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Vehicle Details')),
                 const SizedBox(height: 12),
-                TextField(controller: carModelController, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Car Model & Year')),
+                TextField(controller: carModelController, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Damage Description')),
                 const SizedBox(height: 12),
                 TextField(controller: descriptionController, maxLines: 3, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Additional Details')),
                 const SizedBox(height: 16),
@@ -165,10 +163,10 @@ class _SparePartsScreenState extends State<SparePartsScreen> {
                           setModalState(() => isSubmitting = true);
                           final token = await ApiService.getToken();
                           
-                          final request = http.MultipartRequest('POST', Uri.parse('${ApiService.baseUrl}/spare-parts/'));
+                          final request = http.MultipartRequest('POST', Uri.parse('${ApiService.baseUrl}/repairs/'));
                           request.headers['Authorization'] = 'Bearer $token';
-                          request.fields['part_name'] = partNameController.text;
-                          request.fields['car_model'] = carModelController.text;
+                          request.fields['vehicle_details'] = partNameController.text;
+                          request.fields['damage_description'] = carModelController.text;
                           request.fields['description'] = descriptionController.text;
                           
                           if (selectedImage != null) {
@@ -198,7 +196,7 @@ class _SparePartsScreenState extends State<SparePartsScreen> {
     );
   }
 
-  void _showOfferDialog(int requestId, String partName) {
+  void _showBidDialog(int requestId, String partName) {
     final priceController = TextEditingController();
     final notesController = TextEditingController();
     bool isSubmitting = false;
@@ -216,7 +214,7 @@ class _SparePartsScreenState extends State<SparePartsScreen> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text('Offer for: $partName', style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                Text('Bid for: $partName', style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 16),
                 TextField(controller: priceController, keyboardType: TextInputType.number, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Asking Price (₹)')),
                 const SizedBox(height: 12),
@@ -231,10 +229,10 @@ class _SparePartsScreenState extends State<SparePartsScreen> {
                           setModalState(() => isSubmitting = true);
                           final token = await ApiService.getToken();
                           final res = await http.post(
-                            Uri.parse('${ApiService.baseUrl}/spare-parts/$requestId/offers'),
+                            Uri.parse('${ApiService.baseUrl}/repairs/$requestId/bids'),
                             headers: {'Authorization': 'Bearer $token', 'Content-Type': 'application/json'},
                             body: json.encode({
-                              'price': double.tryParse(priceController.text) ?? 0,
+                              'amount': double.tryParse(priceController.text) ?? 0,
                               'notes': notesController.text,
                             }),
                           );
@@ -244,7 +242,7 @@ class _SparePartsScreenState extends State<SparePartsScreen> {
                           if (res.statusCode == 200) {
                             Navigator.pop(context);
                             _fetchRequests();
-                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Offer submitted successfully!'), backgroundColor: Colors.green));
+                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Bid submitted successfully!'), backgroundColor: Colors.green));
                           } else {
                             setModalState(() => isSubmitting = false);
                           }
@@ -271,7 +269,7 @@ class _SparePartsScreenState extends State<SparePartsScreen> {
               onPressed: _showRequestDialog,
               backgroundColor: const Color(0xFF10B981),
               icon: const Icon(Icons.add, color: Colors.white),
-              label: const Text('Request Part', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              label: const Text('Request Repair', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
             )
           : null,
       body: _isLoading
@@ -283,7 +281,7 @@ class _SparePartsScreenState extends State<SparePartsScreen> {
                   itemCount: _requests.length,
                   itemBuilder: (context, index) {
                     final req = _requests[index];
-                    final List offers = req['offers'] ?? [];
+                    final List bids = req['bids'] ?? [];
                     
                     return Card(
                       margin: const EdgeInsets.only(bottom: 24.0),
@@ -298,11 +296,11 @@ class _SparePartsScreenState extends State<SparePartsScreen> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Expanded(child: Text(req['part_name'], style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white))),
+                                Expanded(child: Text(req['vehicle_details'], style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white))),
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                   decoration: BoxDecoration(color: const Color(0xFF334155), borderRadius: BorderRadius.circular(8)),
-                                  child: Text(req['car_model'], style: const TextStyle(color: Colors.white70, fontSize: 13)),
+                                  child: Text(req['damage_description'], style: const TextStyle(color: Colors.white70, fontSize: 13)),
                                 ),
                                 if (role == 'user' || role == 'admin')
                                   IconButton(
@@ -327,10 +325,10 @@ class _SparePartsScreenState extends State<SparePartsScreen> {
                             ],
                             Text(req['description'] ?? '', style: const TextStyle(color: Colors.white70)),
                             const Divider(color: Colors.white12, height: 24),
-                            if ((role == 'user' || role == 'admin') && offers.isNotEmpty) ...[
-                              const Text('Parts Owner Offers', style: TextStyle(color: Color(0xFF3B82F6), fontWeight: FontWeight.bold)),
+                            if ((role == 'user' || role == 'admin') && bids.isNotEmpty) ...[
+                              const Text('Workshop Bids', style: TextStyle(color: Color(0xFF3B82F6), fontWeight: FontWeight.bold)),
                               const SizedBox(height: 8),
-                              ...offers.map((o) => Container(
+                              ...bids.map((o) => Container(
                                 margin: const EdgeInsets.only(top: 8),
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(color: const Color(0xFF0F172A), borderRadius: BorderRadius.circular(8)),
@@ -341,10 +339,10 @@ class _SparePartsScreenState extends State<SparePartsScreen> {
                                     Column(
                                       crossAxisAlignment: CrossAxisAlignment.end,
                                       children: [
-                                        Text('₹${o['price']}', style: const TextStyle(color: Color(0xFF10B981), fontWeight: FontWeight.bold, fontSize: 16)),
+                                        Text('₹${o['amount']}', style: const TextStyle(color: Color(0xFF10B981), fontWeight: FontWeight.bold, fontSize: 16)),
                                         const SizedBox(height: 4),
                                         GestureDetector(
-                                          onTap: () => _startChat(o['id'], 'Parts Owner', req['part_name']),
+                                          onTap: () => _startChat(o['id'], 'Workshop', req['vehicle_details']),
                                           child: Container(
                                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                             decoration: BoxDecoration(color: const Color(0xFF3B82F6).withValues(alpha: 0.2), borderRadius: BorderRadius.circular(4)),
@@ -357,14 +355,14 @@ class _SparePartsScreenState extends State<SparePartsScreen> {
                                 ),
                               )),
                             ],
-                            if ((role == 'user' || role == 'admin') && offers.isEmpty)
-                              const Text('Awaiting offers from parts owners...', style: TextStyle(color: Colors.white38, fontStyle: FontStyle.italic)),
+                            if ((role == 'user' || role == 'admin') && bids.isEmpty)
+                              const Text('Awaiting bids from workshops...', style: TextStyle(color: Colors.white38, fontStyle: FontStyle.italic)),
                             if (role == 'workshop')
                                 SizedBox(
                                   width: double.infinity,
                                   child: ElevatedButton.icon(
                                     style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF3B82F6), padding: const EdgeInsets.symmetric(vertical: 12)),
-                                    onPressed: () => _showOfferDialog(req['id'], req['part_name']),
+                                    onPressed: () => _showBidDialog(req['id'], req['vehicle_details']),
                                     icon: const Icon(Icons.local_offer, size: 18),
                                     label: const Text('SUBMIT OFFER'),
                                   ),

@@ -8,6 +8,7 @@ import 'search_screen.dart';
 import 'marketplace_screen.dart';
 import 'my_listings_screen.dart';
 import 'spare_parts_screen.dart';
+import 'repair_requests_screen.dart';
 import 'chat_list_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -22,6 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (role == 'workshop') {
       return [
         DashboardScreen(),
+        RepairRequestsScreen(),
         SparePartsScreen(),
         ChatListScreen(),
       ];
@@ -33,6 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
       MarketplaceScreen(),
       MyListingsScreen(),
       SparePartsScreen(),
+      RepairRequestsScreen(),
       ChatListScreen(),
     ];
   }
@@ -41,6 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (role == 'workshop') {
       return const [
         BottomNavigationBarItem(icon: Icon(Icons.dashboard_rounded), label: 'Dashboard'),
+        BottomNavigationBarItem(icon: Icon(Icons.handyman), label: 'Repairs'),
         BottomNavigationBarItem(icon: Icon(Icons.build_circle), label: 'Parts'),
         BottomNavigationBarItem(icon: Icon(Icons.message_rounded), label: 'Messages'),
       ];
@@ -52,6 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
       BottomNavigationBarItem(icon: Icon(Icons.storefront_rounded), label: 'Market'),
       BottomNavigationBarItem(icon: Icon(Icons.list_alt), label: 'Listings'),
       BottomNavigationBarItem(icon: Icon(Icons.build_circle), label: 'Parts'),
+      BottomNavigationBarItem(icon: Icon(Icons.handyman), label: 'Repairs'),
       BottomNavigationBarItem(icon: Icon(Icons.message_rounded), label: 'Messages'),
     ];
   }
@@ -104,6 +109,8 @@ class _HomeScreenState extends State<HomeScreen> {
           currentIndex: _currentIndex,
           onTap: (index) => setState(() => _currentIndex = index),
           type: BottomNavigationBarType.fixed,
+          selectedFontSize: 10,
+          unselectedFontSize: 10,
           elevation: 0,
           items: navItems,
         ),

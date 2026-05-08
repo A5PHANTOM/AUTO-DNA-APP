@@ -11,31 +11,51 @@ router = APIRouter(
 )
 
 @router.post("/threads", response_model=schemas.ChatThreadResponse)
-def create_or_get_thread(thread_req: schemas.ChatThreadCreate, db: Session = Depends(database.get_db), current_user: models.User = Depends(get_current_user)):
-    offer = db.query(models.SparePartOffer).filter(models.SparePartOffer.id == thread_req.offer_id).first()
-    if not offer:
-        raise HTTPException(status_code=404, detail="Offer not found")
-        
-    part_request = db.query(models.SparePartRequest).filter(models.SparePartRequest.id == offer.request_id).first()
-    
-    if current_user.role == "user" and part_request.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="You can only chat on your own requests")
-    if current_user.role == "workshop" and offer.workshop_id != current_user.id:
-        raise HTTPException(status_code=403, detail="You can only chat on your own offers")
-        
-    user_id = part_request.user_id
-    workshop_id = offer.workshop_id
-    
-    existing_thread = db.query(models.ChatThread).filter(
-        models.ChatThread.offer_id == thread_req.offer_id,
-        models.ChatThread.user_id == user_id,
-        models.ChatThread.workshop_id == workshop_id
-    ).first()
-    
+def create_thread(thread_req: schemas.ChatThreadCreate, db: Session = Depends(database.get_db), current_user: models.User = Depends(get_current_user)):
+    if not thread_req.offer_id and not thread_req.bid_id:
+        raise HTTPException(status_code=400, detail="Must provide either offer_id or bid_id")
+
+    user_id = None
+    workshop_id = None
+
+    if thread_req.offer_id:
+        offer = db.query(models.SparePartOffer).filter(models.SparePartOffer.id == thread_req.offer_id).first()
+        if not offer:
+            raise HTTPException(status_code=404, detail="Offer not found")
+        part_request = db.query(models.SparePartRequest).filter(models.SparePartRequest.id == offer.request_id).first()
+        if current_user.role == "user" and part_request.user_id != current_user.id:
+            raise HTTPException(status_code=403, detail="You can only chat on your own requests")
+        if current_user.role == "workshop" and offer.workshop_id != current_user.id:
+            raise HTTPException(status_code=403, detail="You can only chat on your own offers")
+        user_id = part_request.user_id
+        workshop_id = offer.workshop_id
+        existing_thread = db.query(models.ChatThread).filter(
+            models.ChatThread.offer_id == thread_req.offer_id,
+            models.ChatThread.user_id == user_id,
+            models.ChatThread.workshop_id == workshop_id
+        ).first()
+
+    elif thread_req.bid_id:
+        bid = db.query(models.RepairBid).filter(models.RepairBid.id == thread_req.bid_id).first()
+        if not bid:
+            raise HTTPException(status_code=404, detail="Bid not found")
+        repair_request = db.query(models.RepairRequest).filter(models.RepairRequest.id == bid.request_id).first()
+        if current_user.role == "user" and repair_request.user_id != current_user.id:
+            raise HTTPException(status_code=403, detail="You can only chat on your own requests")
+        if current_user.role == "workshop" and bid.workshop_id != current_user.id:
+            raise HTTPException(status_code=403, detail="You can only chat on your own bids")
+        user_id = repair_request.user_id
+        workshop_id = bid.workshop_id
+        existing_thread = db.query(models.ChatThread).filter(
+            models.ChatThread.bid_id == thread_req.bid_id,
+            models.ChatThread.user_id == user_id,
+            models.ChatThread.workshop_id == workshop_id
+        ).first()
+
     if existing_thread:
         return existing_thread
-        
-    new_thread = models.ChatThread(offer_id=thread_req.offer_id, user_id=user_id, workshop_id=workshop_id)
+
+    new_thread = models.ChatThread(offer_id=thread_req.offer_id, bid_id=thread_req.bid_id, user_id=user_id, workshop_id=workshop_id)
     db.add(new_thread)
     db.commit()
     db.refresh(new_thread)
@@ -47,19 +67,31 @@ def get_threads(db: Session = Depends(database.get_db), current_user: models.Use
         threads = db.query(models.ChatThread).filter(models.ChatThread.workshop_id == current_user.id).all()
     else:
         threads = db.query(models.ChatThread).filter(models.ChatThread.user_id == current_user.id).all()
-        
+
     result = []
     for t in threads:
-        offer = db.query(models.SparePartOffer).filter(models.SparePartOffer.id == t.offer_id).first()
-        part_request = db.query(models.SparePartRequest).filter(models.SparePartRequest.id == offer.request_id).first() if offer else None
-        
+        part_name = "Unknown Request"
+        if t.offer_id:
+            offer = db.query(models.SparePartOffer).filter(models.SparePartOffer.id == t.offer_id).first()
+            if offer:
+                part_request = db.query(models.SparePartRequest).filter(models.SparePartRequest.id == offer.request_id).first()
+                if part_request:
+                    part_name = f"Part: {part_request.part_name}"
+        elif t.bid_id:
+            bid = db.query(models.RepairBid).filter(models.RepairBid.id == t.bid_id).first()
+            if bid:
+                repair_request = db.query(models.RepairRequest).filter(models.RepairRequest.id == bid.request_id).first()
+                if repair_request:
+                    part_name = f"Repair: {repair_request.vehicle_details}"
+
         partner_id = t.user_id if current_user.role == "workshop" else t.workshop_id
         partner = db.query(models.User).filter(models.User.id == partner_id).first()
-        
+
         result.append({
             "id": t.id,
             "offer_id": t.offer_id,
-            "part_name": part_request.part_name if part_request else "Unknown Part",
+            "bid_id": t.bid_id,
+            "part_name": part_name,
             "partner_name": partner.username if partner else "Unknown User",
             "created_at": t.created_at
         })

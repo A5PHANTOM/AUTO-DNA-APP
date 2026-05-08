@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ApiService {
   // Manual LAN URL for physical Android testing.
   // Replace the IP when your Mac changes networks.
-  static const String baseUrl = 'http://192.168.1.4:8000/api';
+  static const String baseUrl = 'http://192.168.1.2:8000/api';
 
   // All requests must include this header or localtunnel returns an HTML warning page
   static const Map<String, String> _tunnelHeaders = {

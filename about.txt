@@ -1,0 +1,46 @@
+================================================================================
+                                AUTO DNA
+                        Project Architecture & Features
+================================================================================
+
+1. PROJECT OVERVIEW
+-------------------
+AUTO DNA is an end-to-end comprehensive vehicle lifecycle ecosystem encompassing AI-powered damage estimation, decentralized repair bidding, a localized spare parts marketplace, a used car market, and an intelligent document RQA system built on RAG.
+
+2. TECHNOLOGY STACK
+-------------------
+- **Frontend App**: Flutter & Dart (Cross-platform Mobile Application). Connects via RESTful APIs. Features state management with Provider and real-time UI updates.
+- **Backend API**: Python / FastAPI. Modern, high-performance asynchronous REST API.
+- **Database Layer**: SQLite & SQLAlchemy (ORM).
+- **Admin Dashboard**: Streamlit. Allows platform administrators to moderate AI-evaluated incident reports.
+- **AI Models & Vendors**: Google Gemini 1.5/2.0 Vision APIs.
+- **Vector Database**: Qdrant Vector DB for semantic searching of RTO regulations and automotive maintenance documents.
+
+3. CORE FEATURES & MODULES
+--------------------------
+MODULE A: AI Damage Estimation & Admin Moderation
+- Users can report an automobile incident by uploading pictures of vehicle damage through the mobile app.
+- The system feeds the image into Gemini Vision models coupled with prompt engineering to automatically estimate and categorize the damage severities.
+- A Streamlit admin dashboard serves as a moderation portal for administrators to review the AI outcome and officially 'Approve' or 'Reject' the incident report.
+
+MODULE B: Vehicle Service & Repair Bidding Engine
+- Registered "Car Owners" can post details and images of their vehicle's damage required for repair.
+- Registered "Workshop Owners" can instantly view all repair requests from local users.
+- Workshops compete by placing estimate bids directly to the user to secure the repair job.
+
+MODULE C: Spare Parts Marketplace Ecosystem
+- Car owners searching for auto parts can make "Requests" specifying the component and car model.
+- Registered "Parts Owners" monitor these requests and submit offers with pricing and conditions.
+- Facilitates a direct B2C auction system eliminating middle-men supply chains.
+- Integrated WebSocket/Polling capability enabling private chat threads between the parts buyer and the seller to finalize the transaction.
+
+MODULE D: Used Car Listing Marketplace
+- Car owners can list their vehicles for sale, complete with pricing and historic "Auto DNA" accident/incident reports organically linked to the vehicle's plate_number.
+- Provides buyers with an immutable track-record of what damage the vehicle survived based on backend RTO/Admin approved logic.
+
+MODULE E: RAG Smart RTO Assistant
+- Context-aware RAG RQA (Retrieval Augmented Generation Question Answering) system.
+- Users can naturally chat with the AI to ask queries about RTO fines, traffic regulations, or complex automotive maintenance rules.
+- Documents are chunked, vectorized, and retrieved from Qdrant vector database via semantic similarity searches yielding highly accurate deterministic constraints on the LLM generations.
+
+================================================================================

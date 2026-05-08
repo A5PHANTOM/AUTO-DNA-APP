@@ -5,6 +5,7 @@ import '../services/api_service.dart';
 import 'report_detail_screen.dart';
 
 class SearchScreen extends StatefulWidget {
+  const SearchScreen({super.key});
   @override
   _SearchScreenState createState() => _SearchScreenState();
 }
@@ -85,7 +86,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF3B82F6).withOpacity(0.4),
+                        color: const Color(0xFF3B82F6).withValues(alpha: 0.4),
                         blurRadius: 8,
                         offset: const Offset(0, 4),
                       )
@@ -114,7 +115,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 final report = _searchResults[index];
                 return Card(
                   margin: const EdgeInsets.only(bottom: 16.0),
-                  color: const Color(0xFF1E293B).withOpacity(0.9),
+                  color: const Color(0xFF1E293B).withValues(alpha: 0.9),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   elevation: 6,
                   child: InkWell(

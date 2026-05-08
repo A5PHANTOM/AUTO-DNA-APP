@@ -6,7 +6,7 @@ import '../services/api_service.dart';
 class ReportDetailScreen extends StatefulWidget {
   final Map<String, dynamic> report;
 
-  const ReportDetailScreen({Key? key, required this.report}) : super(key: key);
+  const ReportDetailScreen({super.key, required this.report});
 
   @override
   _ReportDetailScreenState createState() => _ReportDetailScreenState();
@@ -95,7 +95,7 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
               const SizedBox(height: 8),
               Container(
                 padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(color: const Color(0xFF1E293B).withOpacity(0.8), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.white12)),
+                decoration: BoxDecoration(color: const Color(0xFF1E293B).withValues(alpha: 0.8), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.white12)),
                 child: Text(widget.report['description'] ?? 'No description provided.', style: const TextStyle(color: Colors.white, fontSize: 16)),
               ),
               const SizedBox(height: 32),

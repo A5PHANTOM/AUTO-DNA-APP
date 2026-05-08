@@ -1,0 +1,30 @@
+Validation Error: [{'type': 'missing', 'loc': ('body', 'amount'), 'msg': 'Field required', 'input': {'price': 3131.0, 'notes': ''}}]
+Body: {"price":3131.0,"notes":""}
+
+Validation Error: [{'type': 'missing', 'loc': ('body', 'amount'), 'msg': 'Field required', 'input': {'price': 2000.0, 'notes': 'hauwi'}}]
+Body: {"price":2000.0,"notes":"hauwi"}
+
+Validation Error: [{'type': 'missing', 'loc': ('body', 'amount'), 'msg': 'Field required', 'input': {'price': 2822.0, 'notes': 'see'}}]
+Body: {"price":2822.0,"notes":"see"}
+
+Validation Error: [{'type': 'missing', 'loc': ('body', 'amount'), 'msg': 'Field required', 'input': {'price': 2822.0, 'notes': 'see'}}]
+Body: {"price":2822.0,"notes":"see"}
+
+Validation Error: [{'type': 'missing', 'loc': ('body', 'offer_id'), 'msg': 'Field required', 'input': {'bid_id': 2}}]
+Body: {"bid_id":2}
+
+Validation Error: [{'type': 'missing', 'loc': ('body', 'offer_id'), 'msg': 'Field required', 'input': {'bid_id': 2}}]
+Body: {"bid_id":2}
+
+Validation Error: [{'type': 'missing', 'loc': ('body', 'offer_id'), 'msg': 'Field required', 'input': {'bid_id': 2}}]
+Body: {"bid_id":2}
+
+Validation Error: [{'type': 'missing', 'loc': ('body', 'offer_id'), 'msg': 'Field required', 'input': {'bid_id': 2}}]
+Body: {"bid_id":2}
+
+Validation Error: [{'type': 'missing', 'loc': ('body', 'offer_id'), 'msg': 'Field required', 'input': {'bid_id': 2}}]
+Body: {"bid_id":2}
+
+Validation Error: [{'type': 'missing', 'loc': ('body', 'offer_id'), 'msg': 'Field required', 'input': {'bid_id': 2}}]
+Body: {"bid_id":2}
+

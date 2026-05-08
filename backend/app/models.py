@@ -15,6 +15,8 @@ class User(Base):
     spare_part_offers = relationship("SparePartOffer", back_populates="workshop")
     chat_threads_as_user = relationship("ChatThread", foreign_keys="[ChatThread.user_id]", back_populates="user")
     chat_threads_as_workshop = relationship("ChatThread", foreign_keys="[ChatThread.workshop_id]", back_populates="workshop")
+    repair_requests = relationship("RepairRequest", back_populates="user")
+    repair_bids = relationship("RepairBid", back_populates="workshop")
     messages = relationship("Message", back_populates="sender")
 
 class Report(Base):
@@ -51,6 +53,7 @@ class SparePartRequest(Base):
     part_name = Column(String, index=True)
     car_model = Column(String)
     description = Column(Text)
+    image_path = Column(String, nullable=True)
 
     user = relationship("User", back_populates="spare_part_requests")
     offers = relationship("SparePartOffer", back_populates="request")
@@ -73,12 +76,14 @@ import datetime
 class ChatThread(Base):
     __tablename__ = "chat_threads"
     id = Column(Integer, primary_key=True, index=True)
-    offer_id = Column(Integer, ForeignKey("spare_part_offers.id"))
+    offer_id = Column(Integer, ForeignKey("spare_part_offers.id"), nullable=True)
+    bid_id = Column(Integer, ForeignKey("repair_bids.id"), nullable=True)
     user_id = Column(Integer, ForeignKey("users.id"))
     workshop_id = Column(Integer, ForeignKey("users.id"))
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
     offer = relationship("SparePartOffer", back_populates="chat_threads")
+    bid = relationship("RepairBid", back_populates="chat_threads")
     user = relationship("User", foreign_keys=[user_id], back_populates="chat_threads_as_user")
     workshop = relationship("User", foreign_keys=[workshop_id], back_populates="chat_threads_as_workshop")
     messages = relationship("Message", back_populates="thread")
@@ -93,3 +98,27 @@ class Message(Base):
 
     thread = relationship("ChatThread", back_populates="messages")
     sender = relationship("User", back_populates="messages")
+
+class RepairRequest(Base):
+    __tablename__ = "repair_requests"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    vehicle_details = Column(String)
+    damage_description = Column(Text)
+    image_path = Column(String, nullable=True)
+    status = Column(String, default="pending")
+
+    user = relationship("User", back_populates="repair_requests")
+    bids = relationship("RepairBid", back_populates="request")
+
+class RepairBid(Base):
+    __tablename__ = "repair_bids"
+    id = Column(Integer, primary_key=True, index=True)
+    request_id = Column(Integer, ForeignKey("repair_requests.id"))
+    workshop_id = Column(Integer, ForeignKey("users.id"))
+    amount = Column(Float)
+    notes = Column(Text, nullable=True)
+
+    request = relationship("RepairRequest", back_populates="bids")
+    workshop = relationship("User", back_populates="repair_bids")
+    chat_threads = relationship("ChatThread", back_populates="bid")

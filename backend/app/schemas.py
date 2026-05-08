@@ -84,7 +84,7 @@ class SparePartOfferResponse(SparePartOfferBase):
 class SparePartRequestBase(BaseModel):
     part_name: str
     car_model: str
-    description: str
+    description: Optional[str] = None
 
 class SparePartRequestCreate(SparePartRequestBase):
     pass
@@ -92,6 +92,7 @@ class SparePartRequestCreate(SparePartRequestBase):
 class SparePartRequestResponse(SparePartRequestBase):
     id: int
     user_id: int
+    image_path: Optional[str] = None
     offers: List[SparePartOfferResponse] = []
 
     class Config:
@@ -115,14 +116,48 @@ class MessageResponse(MessageBase):
         from_attributes = True
 
 class ChatThreadCreate(BaseModel):
-    offer_id: int
+    offer_id: Optional[int] = None
+    bid_id: Optional[int] = None
 
 class ChatThreadResponse(BaseModel):
     id: int
-    offer_id: int
+    offer_id: Optional[int] = None
+    bid_id: Optional[int] = None
     user_id: int
     workshop_id: int
     created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class RepairBidBase(BaseModel):
+    amount: float
+    notes: Optional[str] = None
+
+class RepairBidCreate(RepairBidBase):
+    pass
+
+class RepairBidResponse(RepairBidBase):
+    id: int
+    request_id: int
+    workshop_id: int
+
+    class Config:
+        from_attributes = True
+
+class RepairRequestBase(BaseModel):
+    vehicle_details: str
+    damage_description: str
+
+class RepairRequestCreate(RepairRequestBase):
+    pass
+
+class RepairRequestResponse(RepairRequestBase):
+    id: int
+    user_id: int
+    image_path: Optional[str] = None
+    status: str
+    bids: List[RepairBidResponse] = []
 
     class Config:
         from_attributes = True

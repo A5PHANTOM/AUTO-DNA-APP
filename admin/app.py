@@ -4,7 +4,7 @@ import pandas as pd
 from collections import defaultdict
 import os
 
-API_URL = "http://192.168.1.4:8000/api"
+API_URL = "http://192.168.1.2:8000/api"
 REQUEST_TIMEOUT_SECONDS = 12
 DEFAULT_PUBLIC_BASE_URL = os.getenv("BACKEND_PUBLIC_BASE_URL", API_URL.replace("/api", ""))
 

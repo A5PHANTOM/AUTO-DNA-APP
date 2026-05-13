@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../services/api_service.dart';
 import 'report_detail_screen.dart';
+import 'report_incident_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   @override
@@ -77,7 +78,39 @@ class _DashboardScreenState extends State<DashboardScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('My Reports', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('My Reports', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
+                  OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => Scaffold(
+                          appBar: AppBar(title: const Text('New Report'), backgroundColor: const Color(0xFF0F172A)),
+                          body: Container(
+                            decoration: const BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
+                              ),
+                            ),
+                            child: const ReportIncidentScreen(),
+                          ),
+                        )),
+                      ).then((_) => _fetchMyReports());
+                    },
+                    icon: const Icon(Icons.add, size: 18),
+                    label: const Text('NEW REPORT'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0xFF3B82F6),
+                      side: const BorderSide(color: Color(0xFF3B82F6)),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    ),
+                  ),
+                ],
+              ),
               const SizedBox(height: 8),
               Text('You have ${_reports.length} incident reports', style: const TextStyle(color: Colors.white70)),
             ],

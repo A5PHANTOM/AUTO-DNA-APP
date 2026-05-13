@@ -23,6 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (role == 'workshop') {
       return [
         DashboardScreen(),
+        ReportIncidentScreen(),
         RepairRequestsScreen(),
         SparePartsScreen(),
         ChatListScreen(),
@@ -44,6 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (role == 'workshop') {
       return const [
         BottomNavigationBarItem(icon: Icon(Icons.dashboard_rounded), label: 'Dashboard'),
+        BottomNavigationBarItem(icon: Icon(Icons.add_circle_outline), label: 'Report'),
         BottomNavigationBarItem(icon: Icon(Icons.handyman), label: 'Repairs'),
         BottomNavigationBarItem(icon: Icon(Icons.build_circle), label: 'Parts'),
         BottomNavigationBarItem(icon: Icon(Icons.message_rounded), label: 'Messages'),
